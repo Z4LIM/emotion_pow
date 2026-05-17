@@ -1,0 +1,147 @@
+.mood-bubbles-container {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  padding: 24px 16px 64px;
+  overflow: visible;
+}
+
+.mood-bubble {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 2px solid var(--color-border-secondary);
+  border-radius: 50px;
+  background-color: var(--color-bg-primary);
+  cursor: pointer;
+  user-select: none;
+  opacity: 0;
+  transform: scale(0);
+  animation: mood-bubble-float 3s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+  transition: border-color 200ms var(--ease-smooth),
+              background-color 200ms var(--ease-smooth),
+              box-shadow 200ms var(--ease-smooth);
+  z-index: 1;
+}
+
+.mood-bubble:hover {
+  transform: scale(1.06);
+  border-color: var(--bubble-color, var(--color-emotion-positive));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-emotion-positive) 30%, transparent);
+  z-index: 2;
+}
+
+.mood-bubble:focus-visible {
+  outline: 2px solid var(--color-emotion-positive);
+  outline-offset: 2px;
+}
+
+.mood-bubble.selected {
+  background-color: var(--bubble-color, var(--color-emotion-positive));
+  border-color: var(--bubble-color, var(--color-emotion-positive));
+  color: var(--color-bg-primary);
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-border-primary) 15%, transparent);
+  z-index: 2;
+}
+
+.mood-bubble.selected .mood-bubble-text {
+  color: var(--color-bg-primary);
+}
+
+.mood-bubble-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.mood-bubble-text {
+  font-size: var(--text-body-sm);
+  font-family: var(--font-comic-body);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  line-height: 1.2;
+  transition: color 200ms var(--ease-smooth);
+}
+
+.mood-bubble-rhythm {
+  display: block;
+  font-size: var(--text-small);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  margin-top: 2px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 300ms var(--ease-smooth), max-height 300ms var(--ease-smooth);
+}
+
+.mood-bubble:hover .mood-bubble-rhythm,
+.mood-bubble.selected .mood-bubble-rhythm {
+  opacity: 1;
+  max-height: 40px;
+}
+
+.bubbles-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background-color: var(--color-bg-secondary);
+  border-top: 2px solid var(--color-border-secondary);
+  border-radius: 0 0 4px 4px;
+  z-index: 3;
+}
+
+.bubbles-progress-fill {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--gradient-valence);
+  transition: width 300ms var(--ease-smooth);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.bubbles-progress-text {
+  font-size: var(--text-small);
+  font-family: var(--font-comic-body);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.mood-bubble-particle {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: var(--layer-effects);
+}
+
+@keyframes mood-bubble-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.mood-bubble.selected {
+  animation: mood-bubble-float-selected 3s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+@keyframes mood-bubble-float-selected {
+  0%, 100% { transform: translateY(0) scale(1.08); }
+  50% { transform: translateY(-6px) scale(1.08); }
+}
+
+[data-theme="dark"] .mood-bubble-particle {
+  opacity: 0.85;
+}

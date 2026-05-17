@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知识库重构方案对比</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg-primary: #FAF9F7;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #F5F3F0;
+      --text-primary: #2D2A26;
+      --text-secondary: #6B6865;
+      --text-tertiary: #9B9895;
+      --border-primary: #2D2A26;
+      --border-secondary: #C5C2BD;
+      --accent-positive: #8AA68A;
+      --accent-warm: #C4A86A;
+      --accent-cool: #8A9BB6;
+      --accent-rose: #B88686;
+      --shadow-sm: 2px 2px 0px var(--border-secondary);
+      --shadow-md: 4px 4px 0px var(--border-secondary);
+    }
+    
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+    
+    .approach-nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    
+    .approach-btn {
+      padding: 10px 24px;
+      border: 2px solid var(--border-secondary);
+      background: var(--bg-secondary);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      border-radius: 0;
+    }
+    
+    .approach-btn:hover {
+      border-color: var(--border-primary);
+    }
+    
+    .approach-btn.active {
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      border-color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .approach-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .approach-section.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .approach-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .approach-header h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    
+    .approach-header p {
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* Mobile Phone Frame */
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      background: var(--bg-secondary);
+      border: 3px solid var(--border-primary);
+      border-radius: 40px;
+      overflow: hidden;
+      position: relative;
+      margin: 0 auto 40px;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 30px;
+      background: var(--text-primary);
+      border-radius: 0 0 20px 20px;
+      z-index: 100;
+    }
+    
+    .phone-content {
+      height: 100%;
+      overflow-y: auto;
+      padding-top: 50px;
+    }
+    
+    .phone-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--bg-secondary);
+      border-top: 2px solid var(--border-primary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 50;
+    }
+    
+    .phone-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+    }
+    
+    .phone-nav-item.active {
+      color: var(--accent-positive);
+    }
+    
+    .phone-nav-item span:first-child {
+      font-size: 1.2rem;
+    }
+    
+    /* Card Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 16px;
+    }
+    
+    .module-card {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-secondary);
+      padding: 16px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+    
+    .module-card:hover {
+      border-color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .module-card-num {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--bg-tertiary);
+      line-height: 1;
+    }
+    
+    .module-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+    
+    .module-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+    
+    .module-card p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    
+    .module-card-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.65rem;
+      margin-top: 8px;
+      background: var(--accent-positive);
+      color: white;
+    }
+    
+    /* Floating Card Variant */
+    .floating-card {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-primary);
+      padding: 12px;
+      margin: 12px 16px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+    
+    .floating-card::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 20px;
+      width: 40px;
+      height: 12px;
+      background: var(--accent-warm);
+      border-radius: 4px 4px 0 0;
+    }
+    
+    /* Timeline Variant */
+    .timeline-container {
+      padding: 20px;
+    }
+    
+    .timeline-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .timeline-track {
+      position: relative;
+      padding-left: 30px;
+    }
+    
+    .timeline-track::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--border-secondary);
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-secondary);
+    }
+    
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -26px;
+      top: 20px;
+      width: 12px;
+      height: 12px;
+      background: var(--accent-positive);
+      border-radius: 50%;
+      border: 3px solid var(--bg-primary);
+    }
+    
+    .timeline-item h4 {
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    
+    .timeline-item p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Carousel Variant */
+    .carousel-container {
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .carousel-card {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-primary);
+      padding: 24px;
+      margin-bottom: 16px;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-secondary);
+    }
+    
+    .carousel-dot.active {
+      background: var(--text-primary);
+      transform: scale(1.3);
+    }
+    
+    /* Contextual Variant */
+    .contextual-flow {
+      padding: 20px;
+    }
+    
+    .flow-node {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-secondary);
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    
+    .flow-node::after {
+      content: '↓';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--accent-positive);
+      font-size: 1.2rem;
+    }
+    
+    .flow-node:last-child::after {
+      display: none;
+    }
+    
+    .flow-node-label {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    
+    .flow-node h4 {
+      font-size: 0.9rem;
+    }
+    
+    .flow-node p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    
+    /* Feature List */
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+    
+    .feature-item {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-secondary);
+      padding: 20px;
+    }
+    
+    .feature-item h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .feature-item p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    
+    .pro-tag {
+      color: var(--accent-positive);
+    }
+    
+    .con-tag {
+      color: var(--accent-rose);
+    }
+    
+    .tag {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+    
+    .tag.pro { background: rgba(138,166,138,0.2); color: var(--accent-positive); }
+    .tag.con { background: rgba(184,134,134,0.2); color: var(--accent-rose); }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      background: var(--bg-secondary);
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-secondary);
+      font-size: 0.85rem;
+    }
+    
+    .comparison-table th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+    }
+    
+    .comparison-table td:first-child {
+      font-weight: 500;
+    }
+    
+    .checkmark { color: var(--accent-positive); }
+    .cross { color: var(--accent-rose); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 知识库重构方案对比</h1>
+    <p class="subtitle">探索不同的呈现方式、触发时机与 UI 布局</p>
+    
+    <div class="approach-nav">
+      <button class="approach-btn active" onclick="showApproach('current')">当前方案</button>
+      <button class="approach-btn" onclick="showApproach('cards')">A. 卡片网格</button>
+      <button class="approach-btn" onclick="showApproach('timeline')">B. 时间轴</button>
+      <button class="approach-btn" onclick="showApproach('carousel')">C. 轮播探索</button>
+      <button class="approach-btn" onclick="showApproach('contextual')">D. 情境融入</button>
+    </div>
+    
+    <!-- Current Approach -->
+    <div id="current" class="approach-section active">
+      <div class="approach-header">
+        <h2>📱 当前方案：独立页面 + 模态框</h2>
+        <p>知识库作为独立页面入口，用户主动访问后以模态框形式展示内容。</p>
+      </div>
+      
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-content">
+          <div style="padding: 16px;">
+            <h2 style="font-size: 1.2rem; text-align: center;">情绪科学</h2>
+            <p style="text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">用漫画的方式，了解情绪背后的心理学知识</p>
+            
+            <div class="card-grid" style="grid-template-columns: 1fr;">
+              <div class="module-card">
+                <span class="module-card-num">01</span>
+                <div class="module-card-icon" style="background: var(--accent-cool);">🎭</div>
+                <h3>情绪是什么</h3>
+                <p>情绪是心理和生理状态的综合反应</p>
+              </div>
+              <div class="module-card">
+                <span class="module-card-num">02</span>
+                <div class="module-card-icon" style="background: var(--accent-positive);">📊</div>
+                <h3>效价与唤醒度</h3>
+                <p>情绪的两个维度定位</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-nav">
+          <div class="phone-nav-item"><span>🏠</span><span>首页</span></div>
+          <div class="phone-nav-item active"><span>📚</span><span>知识库</span></div>
+          <div class="phone-nav-item"><span>✏️</span><span>记录</span></div>
+          <div class="phone-nav-item"><span>📈</span><span>洞察</span></div>
+        </div>
+      </div>
+      
+      <table class="comparison-table">
+        <tr>
+          <th>维度</th>
+          <th>当前方案</th>
+        </tr>
+        <tr><td>访问方式</td><td>用户主动点击「知识库」入口</td></tr>
+        <tr><td>呈现形式</td><td>列表 → 模态框弹出</td></tr>
+        <tr><td>与记录流程关系</td><td>完全独立，无关联</td></tr>
+        <tr><td>触达时机</td><td>仅在用户主动探索时</td></tr>
+        <tr><td>优点</td><td>结构清晰，用户自主选择</td></tr>
+        <tr><td>缺点</td><td>被动触达，入口偏僻，知识与实践割裂</td></tr>
+      </table>
+    </div>
+    
+    <!-- Approach A: Cards -->
+    <div id="cards" class="approach-section">
+      <div class="approach-header">
+        <h2>🃏 方案 A：卡片网格 + 浮动知识</h2>
+        <p>将知识库打散为独立卡片，随机或按主题浮动在首页，用户点击展开阅读。</p>
+      </div>
+      
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-content">
+          <div style="padding: 16px; position: relative; min-height: 500px;">
+            <h2 style="font-size: 1.1rem; margin-bottom: 16px;">欢迎回来</h2>
+            
+            <!-- Floating Cards -->
+            <div class="floating-card" style="position: absolute; right: 10px; top: 60px; width: 140px; transform: rotate(3deg);">
+              <div style="font-size: 0.7rem; color: var(--accent-warm);">💡 小知识</div>
+              <p style="font-size: 0.75rem; margin-top: 4px;">命名情绪可使杏仁核活跃度降低50%</p>
+            </div>
+            
+            <div class="floating-card" style="position: absolute; left: 10px; top: 180px; width: 150px; transform: rotate(-2deg); background: rgba(138,155,182,0.1);">
+              <div style="font-size: 0.7rem; color: var(--accent-cool);">🧠 心理学</div>
+              <p style="font-size: 0.75rem; margin-top: 4px;">耶克斯-多德森定律：中等压力下表现最佳</p>
+            </div>
+            
+            <div class="floating-card" style="position: absolute; right: 5px; top: 320px; width: 130px; transform: rotate(1deg);">
+              <div style="font-size: 0.7rem; color: var(--accent-rose);">❤️ 健康</div>
+              <p style="font-size: 0.75rem; margin-top: 4px;">乐观者心脏病发病率降低35%</p>
+            </div>
+            
+            <!-- Today's Mood -->
+            <div style="background: var(--bg-secondary); border: 2px solid var(--border-primary); padding: 16px; margin-bottom: 12px;">
+              <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 8px;">今日心情</div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 2rem;">😊</span>
+                <div>
+                  <div style="font-size: 0.9rem;">平静满足</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary);">效价 +0.6 · 唤醒度 -0.2</div>
+                </div>
+              </div>
+            </div>
+            
+            <div style="background: var(--bg-secondary); border: 2px solid var(--border-secondary); padding: 16px; margin-bottom: 12px;">
+              <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 8px;">最近记录</div>
+              <p style="font-size: 0.85rem;">暂无更多记录</p>
+            </div>
+          </div>
+        </div>
+        <div class="phone-nav">
+          <div class="phone-nav-item active"><span>🏠</span><span>首页</span></div>
+          <div class="phone-nav-item"><span>📚</span><span>知识库</span></div>
+          <div class="phone-nav-item"><span>✏️</span><span>记录</span></div>
+          <div class="phone-nav-item"><span>📈</span><span>洞察</span></div>
+        </div>
+      </div>
+      
+      <div class="feature-list">
+        <div class="feature-item">
+          <h4>✅ 优点 <span class="tag pro">推荐指数</span></h4>
+          <p>知识碎片化呈现，降低阅读门槛；首页即可触达，无需专门跳转；自然融入使用流程</p>
+        </div>
+        <div class="feature-item">
+          <h4>⚠️ 注意事项</h4>
+          <p>需要控制卡片数量避免视觉干扰；考虑用户关闭/重置机制；卡片内容需精选，与用户状态相关</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Approach B: Timeline -->
+    <div id="timeline" class="approach-section">
+      <div class="approach-header">
+        <h2>📅 方案 B：学习路径 + 进度追踪</h2>
+        <p>将知识库设计为一条学习路径，用户按顺序解锁，掌握后再解锁下一阶段。</p>
+      </div>
+      
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-content">
+          <div class="timeline-container">
+            <div class="timeline-header">
+              <h3 style="font-size: 1rem;">🗺️ 学习路径</h3>
+              <p style="font-size: 0.75rem; color: var(--text-secondary);">进度 3/8</p>
+            </div>
+            
+            <div class="timeline-track">
+              <div class="timeline-item">
+                <h4>✅ 情绪是什么</h4>
+                <p>已完成 · 掌握度 92%</p>
+              </div>
+              <div class="timeline-item">
+                <h4>✅ 效价与唤醒度</h4>
+                <p>已完成 · 掌握度 85%</p>
+              </div>
+              <div class="timeline-item" style="border-color: var(--accent-positive); background: rgba(138,166,138,0.1);">
+                <h4>🔥 情绪与健康</h4>
+                <p>进行中 · 推荐先学</p>
+              </div>
+              <div class="timeline-item" style="opacity: 0.5;">
+                <h4>🔒 情绪调节</h4>
+                <p>未解锁</p>
+              </div>
+              <div class="timeline-item" style="opacity: 0.5;">
+                <h4>🔒 情绪智力</h4>
+                <p>未解锁</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-nav">
+          <div class="phone-nav-item active"><span>🏠</span><span>首页</span></div>
+          <div class="phone-nav-item"><span>📚</span><span>知识库</span></div>
+          <div class="phone-nav-item"><span>✏️</span><span>记录</span></div>
+          <div class="phone-nav-item"><span>📈</span><span>洞察</span></div>
+        </div>
+      </div>
+      
+      <div class="feature-list">
+        <div class="feature-item">
+          <h4>✅ 优点</h4>
+          <p>系统性学习体验；进度感激励持续探索；可设计「知识点测验」验证掌握度</p>
+        </div>
+        <div class="feature-item">
+          <h4>⚠️ 缺点</h4>
+          <p>线性结构可能让只想查单个知识的用户感到受限制；需要更多内容填充路径</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Approach C: Carousel -->
+    <div id="carousel" class="approach-section">
+      <div class="approach-header">
+        <h2>🎠 方案 C：情境化轮播探索</h2>
+        <p>记录完成后自动展示相关知识卡片，像阅读故事一样探索心理学知识。</p>
+      </div>
+      
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-content">
+          <div class="carousel-container">
+            <div class="carousel-card">
+              <div style="font-size: 0.7rem; color: var(--accent-positive); margin-bottom: 8px;">📚 来自知识库</div>
+              <h3 style="font-size: 1.1rem; margin-bottom: 8px;">为什么你会感到焦虑？</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+                当你记录了「焦虑」情绪后，系统会自动推荐这篇解读。焦虑是大脑对潜在威胁的响应，适度的焦虑能提升表现...
+              </p>
+              <button style="padding: 8px 20px; background: var(--text-primary); color: var(--bg-primary); border: none; cursor: pointer; font-size: 0.85rem;">
+                继续阅读
+              </button>
+            </div>
+            
+            <div class="carousel-dots">
+              <span class="carousel-dot active"></span>
+              <span class="carousel-dot"></span>
+              <span class="carousel-dot"></span>
+              <span class="carousel-dot"></span>
+            </div>
+            
+            <p style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 16px;">左右滑动查看更多</p>
+          </div>
+        </div>
+        <div class="phone-nav">
+          <div class="phone-nav-item"><span>🏠</span><span>首页</span></div>
+          <div class="phone-nav-item"><span>📚</span><span>知识库</span></div>
+          <div class="phone-nav-item active"><span>✏️</span><span>记录</span></div>
+          <div class="phone-nav-item"><span>📈</span><span>洞察</span></div>
+        </div>
+      </div>
+      
+      <div class="feature-list">
+        <div class="feature-item">
+          <h4>✅ 优点</h4>
+          <p>情境触发，学习与实践紧密结合；降低探索成本，自动推荐相关内容；像读故事一样自然</p>
+        </div>
+        <div class="feature-item">
+          <h4>⚠️ 挑战</h4>
+          <p>需要构建「情绪 → 知识」的智能推荐算法；平衡推荐频率，避免打扰用户</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Approach D: Contextual -->
+    <div id="contextual" class="approach-section">
+      <div class="approach-header">
+        <h2>🔗 方案 D：情境融入 + 知识内嵌</h2>
+        <p>将心理学知识深度融入产品各环节，而非作为独立模块存在。</p>
+      </div>
+      
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-content">
+          <div class="contextual-flow">
+            <div style="text-align: center; margin-bottom: 16px;">
+              <h3 style="font-size: 1rem;">记录完成后</h3>
+            </div>
+            
+            <div class="flow-node">
+              <div class="flow-node-label">步骤 1</div>
+              <h4>保存心情记录</h4>
+              <p>记录已保存到本地</p>
+            </div>
+            
+            <div class="flow-node" style="border-color: var(--accent-positive);">
+              <div class="flow-node-label">步骤 2 · 推荐阅读</div>
+              <h4>💡 情绪调节技巧</h4>
+              <p>根据你记录的「焦虑」情绪推荐</p>
+            </div>
+            
+            <div class="flow-node">
+              <div class="flow-node-label">洞察</div>
+              <h4>📊 本周情绪模式</h4>
+              <p>你本周积极情绪占比较高</p>
+            </div>
+          </div>
+        </div>
+        <div class="phone-nav">
+          <div class="phone-nav-item"><span>🏠</span><span>首页</span></div>
+          <div class="phone-nav-item"><span>📚</span><span>知识库</span></div>
+          <div class="phone-nav-item active"><span>✏️</span><span>记录</span></div>
+          <div class="phone-nav-item"><span>📈</span><span>洞察</span></div>
+        </div>
+      </div>
+      
+      <table class="comparison-table">
+        <tr>
+          <th>场景</th>
+          <th>知识融入方式</th>
+        </tr>
+        <tr><td>记录完成页</td><td>推荐相关调节知识 + 心理引导卡片</td></tr>
+        <tr><td>洞察页</td><td>图表解读 + 行为模式解释</td></tr>
+        <tr><td>首页</td><td>浮动「今日知识」卡片</td></tr>
+        <tr><td>情绪气泡</td><td>每个情绪标签带简短心理学解释</td></tr>
+        <tr><td>独立知识库</td><td>保留作为「全部知识」归档</td></tr>
+      </table>
+      
+      <div class="feature-list">
+        <div class="feature-item">
+          <h4>✅ 优点</h4>
+          <p>知识与实践无缝衔接；学习发生在最需要的时刻；保留知识库作为深度探索入口</p>
+        </div>
+        <div class="feature-item">
+          <h4>⚠️ 注意</h4>
+          <p>需要精心设计嵌入点，避免过度打扰；内容与情境匹配度要高</p>
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 48px; padding: 24px; background: var(--bg-secondary); border: 2px solid var(--border-secondary);">
+      <h3 style="margin-bottom: 16px;">💭 讨论要点</h3>
+      <ul style="font-size: 0.9rem; color: var(--text-secondary); line-height: 2;">
+        <li>知识库应该作为「主动探索」还是「被动触达」？</li>
+        <li>记录完成后是展示知识的最佳时机吗？</li>
+        <li>需要保留独立的知识库页面吗？</li>
+        <li>可视化算法艺术应该放在哪里展示？</li>
+        <li>如何平衡知识丰富度与用户注意力？</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script>
+    function showApproach(id) {
+      document.querySelectorAll('.approach-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.approach-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

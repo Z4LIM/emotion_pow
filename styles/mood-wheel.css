@@ -1,0 +1,168 @@
+.mood-wheel-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0;
+}
+
+.mood-wheel {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  cursor: crosshair;
+  overflow: hidden;
+  border: 2px solid var(--color-border-secondary);
+  background:
+    radial-gradient(
+      circle at center,
+      var(--color-emotion-neutral) 0%,
+      transparent 30%
+    ),
+    conic-gradient(
+      from 225deg,
+      #A4C2A4 0deg,
+      var(--color-emotion-positive) 45deg,
+      var(--color-emotion-positive-deep) 90deg,
+      var(--color-emotion-neutral) 135deg,
+      var(--color-emotion-negative) 180deg,
+      var(--color-emotion-negative-deep) 225deg,
+      #7A5F5A 270deg,
+      var(--color-emotion-neutral) 315deg,
+      #A4C2A4 360deg
+    );
+  box-shadow:
+    0 4px 16px color-mix(in srgb, var(--color-border-primary) 8%, transparent),
+    inset 0 0 40px color-mix(in srgb, var(--color-emotion-neutral) 30%, transparent);
+  transition: box-shadow 300ms var(--ease-smooth);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mood-wheel:hover {
+  box-shadow:
+    0 6px 24px color-mix(in srgb, var(--color-border-primary) 12%, transparent),
+    inset 0 0 40px color-mix(in srgb, var(--color-emotion-neutral) 30%, transparent);
+}
+
+.mood-wheel-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+  z-index: var(--layer-content, 10);
+}
+
+.mood-wheel-emoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.mood-wheel-desc {
+  font-family: var(--font-comic-body);
+  font-size: var(--text-caption);
+  color: var(--color-text-primary);
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px var(--color-bg-primary);
+}
+
+.mood-wheel-psych {
+  display: block;
+  font-size: var(--text-small);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  margin-top: 2px;
+  opacity: 0;
+  transition: opacity 400ms var(--ease-smooth);
+}
+
+.mood-wheel-psych:not(:empty) {
+  opacity: 1;
+}
+
+.mood-wheel-ripple {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  margin-top: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-bg-primary) 50%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: var(--layer-effects, 40);
+}
+
+.mood-wheel-axis-label {
+  position: absolute;
+  font-family: var(--font-comic-body);
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  z-index: var(--layer-content, 10);
+  opacity: 0.7;
+}
+
+.mood-wheel-axis-top {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mood-wheel-axis-bottom {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mood-wheel-axis-left {
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.mood-wheel-axis-right {
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+[data-theme="dark"] .mood-wheel {
+  background:
+    radial-gradient(
+      circle at center,
+      var(--color-emotion-neutral) 0%,
+      transparent 30%
+    ),
+    conic-gradient(
+      from 225deg,
+      var(--color-emotion-positive) 0deg,
+      var(--color-emotion-positive-deep) 45deg,
+      #6A8B6A 90deg,
+      var(--color-emotion-neutral) 135deg,
+      var(--color-emotion-negative) 180deg,
+      var(--color-emotion-negative-deep) 225deg,
+      #8A6E69 270deg,
+      var(--color-emotion-neutral) 315deg,
+      var(--color-emotion-positive) 360deg
+    );
+  box-shadow:
+    0 4px 16px color-mix(in srgb, var(--color-border-primary) 24%, transparent),
+    inset 0 0 40px color-mix(in srgb, var(--color-emotion-neutral) 20%, transparent);
+}
+
+[data-theme="dark"] .mood-wheel:hover {
+  box-shadow:
+    0 6px 24px color-mix(in srgb, var(--color-border-primary) 32%, transparent),
+    inset 0 0 40px color-mix(in srgb, var(--color-emotion-neutral) 20%, transparent);
+}
+
+[data-theme="dark"] .mood-wheel-ripple {
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-bg-primary) 35%, transparent) 0%, transparent 70%);
+}
