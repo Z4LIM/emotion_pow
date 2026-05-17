@@ -5,6 +5,7 @@ const PageSleepHome = {
       name: '窗月知意',
       icon: '🌲',
       music: 'forest-night',
+      image: 'assets/images/scene-chuangyue.png',
       description: '深夜怀思、独处怅然'
     },
     {
@@ -12,6 +13,7 @@ const PageSleepHome = {
       name: '风月知欢',
       icon: '🎵',
       music: 'pastoral-dusk',
+      image: 'assets/images/scene-fengyue.png',
       description: '心生欢喜、相思温柔'
     },
     {
@@ -19,6 +21,7 @@ const PageSleepHome = {
       name: '山野寄心',
       icon: '🐦',
       music: 'forest-bird',
+      image: 'assets/images/scene-shanye.png',
       description: '人际倦累、渴望松弛'
     },
     {
@@ -26,6 +29,7 @@ const PageSleepHome = {
       name: '云间忘忧',
       icon: '🌊',
       music: 'ocean-rain',
+      image: 'assets/images/scene-yunjian.png',
       description: '思绪纷乱、执念难消'
     },
     {
@@ -33,6 +37,7 @@ const PageSleepHome = {
       name: '温岁安然',
       icon: '✨',
       music: 'spiritual-peace',
+      image: 'assets/images/scene-wensui.png',
       description: '感念流年、淡然自愈'
     },
     {
@@ -40,6 +45,7 @@ const PageSleepHome = {
       name: '朝暮期许',
       icon: '🌆',
       music: 'dreamy-dusk',
+      image: 'assets/images/scene-zhaomu.png',
       description: '前路迷茫、温柔蓄力'
     },
     {
@@ -47,6 +53,7 @@ const PageSleepHome = {
       name: '静念自愈',
       icon: '🧘',
       music: 'bowl-wave',
+      image: 'assets/images/scene-jingnian.png',
       description: '学业承压、自我怀疑'
     },
     {
@@ -54,6 +61,7 @@ const PageSleepHome = {
       name: '浅夏安隅',
       icon: '🛏️',
       music: 'calm-nerves',
+      image: 'assets/images/scene-qianxia.png',
       description: '心绪躁动、满心浮躁'
     }
   ],
@@ -62,9 +70,12 @@ const PageSleepHome = {
     const quote = SleepQuotes.getRandomQuote();
     const scenesHtml = this.sleepScenes.map(scene => `
       <div class="sleep-scene-card" data-scene="${scene.id}" data-music="${scene.music}">
-        <div class="sleep-scene-icon">${scene.icon}</div>
-        <div class="sleep-scene-name">${scene.name}</div>
-        <div class="sleep-scene-desc">${scene.description}</div>
+        <div class="sleep-scene-image" style="background-image: url('${scene.image}')"></div>
+        <div class="sleep-scene-overlay"></div>
+        <div class="sleep-scene-content">
+          <div class="sleep-scene-name">${scene.name}</div>
+          <div class="sleep-scene-desc">${scene.description}</div>
+        </div>
       </div>
     `).join('');
 
